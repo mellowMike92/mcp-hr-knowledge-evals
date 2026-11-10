@@ -4,15 +4,37 @@
   "description": "Model Context Protocol server exposing structured HR policy tools, RAG context retrieval, and an automated evaluation harness.",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "mcp-hr-knowledge-evals": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
   "engines": {
     "node": ">=18.x"
+  },
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "hr",
+    "evals",
+    "rag",
+    "claude",
+    "anthropic"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mellowMike92/mcp-hr-knowledge-evals.git"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
+    "web": "node web/server.mjs",
     "inspector": "npx @modelcontextprotocol/inspector node dist/index.js",
-    "eval": "vitest run evals/"
+    "eval": "vitest run evals/",
+    "prepack": "npm run build"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",

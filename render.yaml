@@ -1,0 +1,10 @@
+# Render blueprint — hosts the live tool demo (web/server.mjs).
+# Dashboard → New → Blueprint → point at this repo.
+services:
+  - type: web
+    name: mcp-hr-knowledge-evals-demo
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: node web/server.mjs
+    healthCheckPath: /api/health

@@ -2,6 +2,10 @@
 
 Enterprise-ready **Model Context Protocol (MCP) server** in TypeScript exposing structured HR policy tools, RAG-style context retrieval with citations, and an automated evaluation harness that benchmarks accuracy against 20 synthetic HR scenarios.
 
+**[Docs](https://mellowmike92.github.io/mcp-hr-knowledge-evals/)** ·
+**[Live tool demo](https://mcp-hr-knowledge-evals-demo.onrender.com)** ·
+**[npm](https://www.npmjs.com/package/mcp-hr-knowledge-evals)**
+
 ## Stack
 
 - **Runtime:** Node.js >= 18 (ESM), TypeScript strict mode (`NodeNext`, `ES2022`)
@@ -18,6 +22,17 @@ npm start          # run server on stdio
 npm run dev        # watch mode via tsx
 npm run inspector  # MCP Inspector: npx @modelcontextprotocol/inspector node dist/index.js
 npm run eval       # vitest run evals/ — 20 scenario benchmarks
+npm run web        # local browser demo on http://localhost:8000
+```
+
+Or install from npm and register with an MCP client:
+
+```bash
+npm install -g mcp-hr-knowledge-evals
+```
+
+```json
+{ "mcpServers": { "hr-knowledge": { "command": "mcp-hr-knowledge-evals" } } }
 ```
 
 Optional: copy `.env.example` to `.env` and set `ANTHROPIC_API_KEY` to enable the
@@ -104,4 +119,16 @@ evals/
   hrScenarioEval.test.ts
 scripts/
   smoke-stdio.mjs     JSON-RPC handshake smoke test
+web/
+  server.mjs          zero-dep HTTP wrapper around dispatchTool (live demo)
+  public/index.html   browser playground for the three tools
+docs/
+  index.html          GitHub Pages docs site
 ```
+
+## Live demo
+
+`web/server.mjs` exposes `POST /api/tools/<name>` and a small static playground,
+calling the same `dispatchTool()` the MCP `tools/call` handler uses — no LLM in
+the loop. `render.yaml` deploys it as a free Render web service (health check at
+`/api/health`); the UI is served same-origin so no extra config is needed.

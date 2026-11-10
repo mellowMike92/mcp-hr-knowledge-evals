@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>mcp-hr-knowledge-evals — docs</title>
+<style>
+  :root {
+    --bg: #0b0f14;
+    --panel: #10161d;
+    --border: #1e293b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #22d3ee;
+    --accent-dim: #164e63;
+    --green: #34d399;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+  code, pre, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  header { border-bottom: 1px solid var(--border); padding-bottom: 1.75rem; margin-bottom: 2.25rem; }
+  h1 { font-size: 2rem; margin: 0 0 .6rem; letter-spacing: -.02em; }
+  h1 .cyan { color: var(--accent); }
+  .tagline { color: var(--muted); font-size: 1.05rem; max-width: 62ch; margin: 0 0 1.25rem; }
+  .badges { display: flex; flex-wrap: wrap; gap: .6rem; }
+  .badge {
+    font-size: .82rem; padding: .35rem .75rem; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--panel); color: var(--text);
+  }
+  .badge.hot { border-color: var(--accent-dim); color: var(--accent); }
+
+  h2 {
+    font-size: 1.25rem; margin: 2.75rem 0 1rem; padding-top: 1.5rem;
+    border-top: 1px solid var(--border); letter-spacing: -.01em;
+  }
+  h3 { font-size: 1rem; margin: 1.5rem 0 .5rem; color: var(--accent); }
+  p { color: #cbd5e1; margin: .5rem 0; }
+  .muted { color: var(--muted); }
+
+  .arch {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 1.1rem 1.25rem; font-size: .85rem; overflow-x: auto; white-space: pre;
+    color: #a5f3fc; line-height: 1.7;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; margin: .75rem 0; }
+  th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+  td code { font-size: .82rem; }
+
+  .tool-card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0;
+  }
+  .tool-card .name { color: var(--accent); font-weight: 600; }
+
+  pre {
+    background: #0d1319; border: 1px solid var(--border); border-radius: 8px;
+    padding: .9rem 1.1rem; font-size: .82rem; overflow-x: auto; line-height: 1.65;
+  }
+  pre code { color: #a5f3fc; }
+  .bench { color: var(--green); }
+  code.inline { background: #0d1319; border: 1px solid var(--border); border-radius: 4px; padding: .1rem .35rem; font-size: .85em; }
+
+  ol.steps { padding-left: 1.3rem; color: #cbd5e1; }
+  ol.steps li { margin: .4rem 0; }
+
+  footer { margin-top: 4rem; padding-top: 1.25rem; border-top: 1px solid var(--border); color: #475569; font-size: .82rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span class="cyan">mcp</span>-hr-knowledge-evals</h1>
+    <p class="tagline">
+      An enterprise-style <strong>Model Context Protocol server</strong> in TypeScript that exposes
+      structured HR policy tools, RAG-style retrieval with citations, and an automated
+      evaluation harness benchmarked against 20 synthetic HR scenarios.
+    </p>
+    <div class="badges">
+      <a class="badge hot" href="https://github.com/mellowMike92/mcp-hr-knowledge-evals">GitHub ↗</a>
+      <a class="badge hot" href="https://mcp-hr-knowledge-evals-demo.onrender.com">Live demo ↗</a>
+      <a class="badge hot" href="https://www.npmjs.com/package/mcp-hr-knowledge-evals">npm ↗</a>
+      <span class="badge">TypeScript · strict</span>
+      <span class="badge">stdio transport</span>
+      <span class="badge">20 eval cases</span>
+    </div>
+  </header>
+
+  <h2>What it is</h2>
+  <p>
+    MCP servers give LLM clients (Claude Desktop, IDEs, agents) a typed tool surface.
+    This one models a realistic internal tool: an HR knowledge base that answers
+    policy questions <em>with citations</em>, exposes onboarding milestones, and
+    generates manager coaching rubrics — plus the eval harness you'd build to
+    prove it doesn't hallucinate.
+  </p>
+  <div class="arch">MCP client (Claude / IDE)
+        │  tools/call · prompts/get · resources/read   (JSON-RPC over stdio)
+        ▼
+hr-knowledge-mcp-server
+        ├── tools      query_hr_policy · get_onboarding_milestones · fetch_manager_coaching_rubric
+        ├── prompts    conduct_manager_1on1
+        ├── resources  hr://policies/&lt;id&gt;  (markdown, citation ids)
+        └── evals      20 scenarios → tool-selection accuracy · retrieval precision · hallucination rate</div>
+
+  <h2>Tools</h2>
+
+  <div class="tool-card">
+    <div class="name mono">query_hr_policy</div>
+    <p class="muted">Keyword/semantic retrieval over the HR handbook. Returns top matching policy documents with full section text and citation ids.</p>
+    <table>
+      <tr><th>param</th><th>type</th><th>req</th><th>notes</th></tr>
+      <tr><td><code>query</code></td><td>string</td><td>yes</td><td>natural-language HR question</td></tr>
+      <tr><td><code>department</code></td><td><code>"HR" | "Engineering" | "Sales"</code></td><td>no</td><td>scope filter</td></tr>
+    </table>
+  </div>
+
+  <div class="tool-card">
+    <div class="name mono">get_onboarding_milestones</div>
+    <p class="muted">Role-family-specific (Engineering / Sales / HR / General) 30-60-90 day expectations and completion criteria.</p>
+    <table>
+      <tr><th>param</th><th>type</th><th>req</th><th>notes</th></tr>
+      <tr><td><code>role</code></td><td>string</td><td>yes</td><td>e.g. <code>"backend engineer"</code></td></tr>
+      <tr><td><code>tenure_days</code></td><td><code>30 | 60 | 90</code></td><td>yes</td><td>onboarding checkpoint</td></tr>
+    </table>
+  </div>
+
+  <div class="tool-card">
+    <div class="name mono">fetch_manager_coaching_rubric</div>
+    <p class="muted">Synthesizes a 1-on-1 agenda, coaching prompts, and SBI feedback guidance keyed to scenario topic and rating.</p>
+    <table>
+      <tr><th>param</th><th>type</th><th>req</th><th>notes</th></tr>
+      <tr><td><code>scenario</code></td><td>string</td><td>yes</td><td>e.g. <code>"missed two sprint deadlines"</code></td></tr>
+      <tr><td><code>performance_rating</code></td><td><code>"Exceeds" | "Meets" | "Needs_Improvement"</code></td><td>yes</td><td>rating tier</td></tr>
+    </table>
+  </div>
+
+  <h3>Prompts &amp; resources</h3>
+  <p>
+    <strong>Prompt:</strong> <code class="inline">conduct_manager_1on1</code> formats employee name, rating,
+    and scenario into a policy-grounded system prompt.
+    <strong>Resources:</strong> every policy is readable at <code class="inline">hr://policies/&lt;id&gt;</code>
+    (e.g. <code class="inline">hr://policies/parental-leave</code>) as markdown with its citation id.
+  </p>
+
+  <h2>Eval harness</h2>
+  <p>
+    <code class="inline">npm run eval</code> runs 20 synthetic scenarios through the same
+    dispatch path as <code class="inline">tools/call</code> and scores each output against ground-truth
+    facts, expected citations, and forbidden-content rules. With
+    <code class="inline">ANTHROPIC_API_KEY</code> set, a Claude-as-judge faithfulness verdict is added per case.
+  </p>
+  <pre class="bench"><code>----------------------------------------------------
+  HR KNOWLEDGE EVAL BENCHMARK          (verified)
+----------------------------------------------------
+  Cases evaluated .......... 20
+  Judge .................... deterministic
+  Tool selection accuracy .. 100.0%
+  Policy retrieval precision 100.0%
+  Hallucination rate ....... 0.0%  (goal 0.0%)
+----------------------------------------------------</code></pre>
+  <table>
+    <tr><th>metric</th><th>what it measures</th></tr>
+    <tr><td>Tool selection accuracy</td><td>heuristic router picks the expected tool for each scenario</td></tr>
+    <tr><td>Policy retrieval precision</td><td>fraction of ground-truth facts present in tool output</td></tr>
+    <tr><td>Hallucination rate</td><td>forbidden content, fabricated citation ids, or missing required citations</td></tr>
+  </table>
+
+  <h2>Use it</h2>
+  <h3>From npm</h3>
+  <pre><code>npm install -g mcp-hr-knowledge-evals</code></pre>
+  <p class="muted">Then register it with an MCP client, e.g. Claude Desktop <code class="inline">claude_desktop_config.json</code>:</p>
+  <pre><code>{
+  "mcpServers": {
+    "hr-knowledge": {
+      "command": "mcp-hr-knowledge-evals"
+    }
+  }
+}</code></pre>
+
+  <h3>From source</h3>
+  <pre><code>git clone https://github.com/mellowMike92/mcp-hr-knowledge-evals
+cd mcp-hr-knowledge-evals
+npm install
+npm run build
+npm run eval       # 20-scenario benchmark
+npm run inspector  # interactive tool explorer
+npm run web        # local live demo on :8000</code></pre>
+
+  <h2>Layout</h2>
+  <pre><code>src/
+  index.ts            entry — StdioServerTransport (bin entry for npm)
+  server.ts           MCP server: tools, prompts, resources, dispatchTool
+  tools/hrTools.ts    tool implementations (pure functions)
+  data/hrPolicies.ts  mock HR handbook with citation ids
+  types/index.ts      interfaces + zod schemas
+evals/                20 scenarios + deterministic scorer + Claude judge
+web/                  zero-dep HTTP demo (server.mjs + public/)
+docs/                 this site</code></pre>
+
+  <footer>
+    Built by <a href="https://github.com/mellowMike92">mellowMike92</a> ·
+    <a href="https://github.com/mellowMike92/mcp-hr-knowledge-evals">source</a> · MIT
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>mcp-hr-knowledge-evals — live tool demo</title>
+<style>
+  :root {
+    --bg: #0b0f14;
+    --panel: #10161d;
+    --border: #1e293b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #22d3ee;
+    --accent-dim: #164e63;
+    --error: #f87171;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  header h1 { font-size: 1.6rem; margin: 0 0 .4rem; letter-spacing: -.01em; }
+  header h1 .cyan { color: var(--accent); }
+  header p { color: var(--muted); margin: 0 0 1.5rem; max-width: 60ch; }
+  header .links a { color: var(--accent); text-decoration: none; margin-right: 1.1rem; font-size: .9rem; }
+  header .links a:hover { text-decoration: underline; }
+  code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+  .tools { display: grid; gap: 1.25rem; }
+  .tool {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .tool-head {
+    display: flex; align-items: baseline; gap: .8rem;
+    padding: .9rem 1.1rem; border-bottom: 1px solid var(--border);
+    background: rgba(34, 211, 238, .04);
+  }
+  .tool-head .name { color: var(--accent); font-weight: 600; }
+  .tool-head .desc { color: var(--muted); font-size: .85rem; }
+  .tool-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  form.inputs { padding: 1.1rem; display: flex; flex-direction: column; gap: .8rem; border-right: 1px solid var(--border); }
+  label { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; display: block; margin-bottom: .3rem; }
+  input[type=text], select {
+    width: 100%; padding: .55rem .7rem;
+    background: #0d1319; color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px;
+    font: inherit;
+  }
+  input:focus, select:focus { outline: 1px solid var(--accent-dim); border-color: var(--accent-dim); }
+  button.run {
+    margin-top: auto; padding: .6rem 1rem;
+    background: var(--accent-dim); color: #ecfeff;
+    border: 1px solid var(--accent); border-radius: 6px;
+    font-weight: 600; cursor: pointer;
+  }
+  button.run:hover { background: #0e7490; }
+  button.run:disabled { opacity: .5; cursor: wait; }
+  .out { padding: 1.1rem; min-width: 0; }
+  .out-label { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .5rem; display: flex; justify-content: space-between; }
+  .out-label .status { font-weight: 600; }
+  .status.ok { color: #34d399; }
+  .status.err { color: var(--error); }
+  pre {
+    margin: 0; padding: .9rem;
+    background: #0d1319; border: 1px solid var(--border); border-radius: 6px;
+    font-size: .8rem; max-height: 420px; overflow: auto;
+    white-space: pre-wrap; word-break: break-word;
+    color: #a5f3fc;
+  }
+  pre.placeholder { color: #475569; font-style: italic; }
+  footer { margin-top: 2.5rem; color: #475569; font-size: .82rem; }
+  footer a { color: var(--muted); }
+  @media (max-width: 760px) { .tool-body { grid-template-columns: 1fr; } form.inputs { border-right: 0; border-bottom: 1px solid var(--border); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span class="cyan">mcp</span>-hr-knowledge-evals <span style="color:var(--muted);font-weight:400">— live demo</span></h1>
+    <p>
+      The three tools exposed by this Model Context Protocol server, callable
+      directly against the same code the eval harness benchmarks.
+      No LLM in the loop — this is the deterministic retrieval &amp; rubric layer.
+    </p>
+    <div class="links">
+      <a href="https://github.com/mellowMike92/mcp-hr-knowledge-evals">GitHub →</a>
+      <a href="https://mellowmike92.github.io/mcp-hr-knowledge-evals/">Docs →</a>
+      <a href="/api/tools">GET /api/tools (schemas) →</a>
+    </div>
+  </header>
+
+  <div class="tools">
+    <section class="tool">
+      <div class="tool-head"><span class="name mono">query_hr_policy</span><span class="desc">keyword/semantic retrieval over the HR handbook, with citation ids</span></div>
+      <div class="tool-body">
+        <form class="inputs" data-tool="query_hr_policy">
+          <div>
+            <label for="q">query</label>
+            <input type="text" id="q" name="query" value="What is the parental leave policy duration?" required />
+          </div>
+          <div>
+            <label for="dept">department (optional)</label>
+            <select id="dept" name="department">
+              <option value="">— all —</option>
+              <option>HR</option><option>Engineering</option><option>Sales</option>
+            </select>
+          </div>
+          <button class="run" type="submit">Run tool</button>
+        </form>
+        <div class="out">
+          <div class="out-label"><span>response</span><span class="status"></span></div>
+          <pre class="placeholder">Run the tool to see its JSON response.</pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="tool">
+      <div class="tool-head"><span class="name mono">get_onboarding_milestones</span><span class="desc">role-specific 30/60/90-day expectations + completion criteria</span></div>
+      <div class="tool-body">
+        <form class="inputs" data-tool="get_onboarding_milestones">
+          <div>
+            <label for="role">role</label>
+            <input type="text" id="role" name="role" value="backend engineer" required />
+          </div>
+          <div>
+            <label for="tenure">tenure_days</label>
+            <select id="tenure" name="tenure_days">
+              <option selected>30</option><option>60</option><option>90</option>
+            </select>
+          </div>
+          <button class="run" type="submit">Run tool</button>
+        </form>
+        <div class="out">
+          <div class="out-label"><span>response</span><span class="status"></span></div>
+          <pre class="placeholder">Run the tool to see its JSON response.</pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="tool">
+      <div class="tool-head"><span class="name mono">fetch_manager_coaching_rubric</span><span class="desc">structured 1-on-1 agenda, coaching prompts &amp; SBI guidance</span></div>
+      <div class="tool-body">
+        <form class="inputs" data-tool="fetch_manager_coaching_rubric">
+          <div>
+            <label for="sc">scenario</label>
+            <input type="text" id="sc" name="scenario" value="missed two sprint deadlines" required />
+          </div>
+          <div>
+            <label for="pr">performance_rating</label>
+            <select id="pr" name="performance_rating">
+              <option>Exceeds</option><option selected>Meets</option><option>Needs_Improvement</option>
+            </select>
+          </div>
+          <button class="run" type="submit">Run tool</button>
+        </form>
+        <div class="out">
+          <div class="out-label"><span>response</span><span class="status"></span></div>
+          <pre class="placeholder">Run the tool to see its JSON response.</pre>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    Same-origin HTTP wrapper (<code>web/server.mjs</code>) calling
+    <code>dispatchTool()</code> — identical code path to the MCP server's
+    <code>tools/call</code> handler. Source:
+    <a href="https://github.com/mellowMike92/mcp-hr-knowledge-evals">mellowMike92/mcp-hr-knowledge-evals</a>.
+  </footer>
+</div>
+
+<script>
+document.querySelectorAll('form.inputs').forEach((form) => {
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const tool = form.dataset.tool;
+    const card = form.closest('.tool');
+    const pre = card.querySelector('pre');
+    const status = card.querySelector('.status');
+    const btn = form.querySelector('button.run');
+
+    const args = {};
+    new FormData(form).forEach((v, k) => {
+      if (v === '') return;
+      args[k] = k === 'tenure_days' ? Number(v) : v;
+    });
+
+    btn.disabled = true;
+    status.textContent = 'running…';
+    status.className = 'status';
+    try {
+      const resp = await fetch(`/api/tools/${tool}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(args),
+      });
+      const data = await resp.json();
+      pre.classList.remove('placeholder');
+      pre.textContent = JSON.stringify(data.ok ? data.result : data, null, 2);
+      status.textContent = `${resp.status} ${data.ok ? 'ok' : 'error'}`;
+      status.classList.add(data.ok ? 'ok' : 'err');
+    } catch (err) {
+      pre.textContent = String(err);
+      status.textContent = 'network error';
+      status.classList.add('err');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+});
+</script>
+</body>
+</html>

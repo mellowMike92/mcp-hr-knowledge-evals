@@ -1,0 +1,30 @@
+{
+  "name": "mcp-hr-knowledge-evals",
+  "version": "1.0.0",
+  "description": "Model Context Protocol server exposing structured HR policy tools, RAG context retrieval, and an automated evaluation harness.",
+  "type": "module",
+  "main": "dist/index.js",
+  "engines": {
+    "node": ">=18.x"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "inspector": "npx @modelcontextprotocol/inspector node dist/index.js",
+    "eval": "vitest run evals/"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "dotenv": "^16.4.5",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3",
+    "vite": "^8.3.7",
+    "vitest": "^5.1.0"
+  }
+}
